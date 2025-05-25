@@ -1,8 +1,7 @@
-const Header = ({ title }) => { 
-return ( 
-<header className="bg-blue-500 text-white py-4"> 
-<h1 className="text-3xl font-bold">{title}</h1> 
-</header> 
-  ); 
-}; 
-export default Header; 
+const Header = ({ title }) => (
+  <header className="bg-blue-500 text-white py-4">
+    <h1 className="text-3xl font-bold">{title}</h1>
+  </header>
+);
+
+export default Header;
