@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";  // Tambahkan useEffect
 import Header from "./components/Header";
 import Summarizer from "./components/Summarizer";
 import History from "./components/History";
@@ -7,67 +7,29 @@ const App = () => {
   const [inputText, setInputText] = useState("");
   const [summary, setSummary] = useState("");
   const [history, setHistory] = useState([]);
-  const [model, setModel] = useState("deepseek/deepseek-chat-v3-0324:free");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);  // Tambahkan state loading
+  const [theme, setTheme] = useState("light"); // Menambahkan state untuk tema
 
+  // Mengambil riwayat ringkasan dari localStorage saat pertama kali aplikasi dimuat
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("summaryHistory")) || [];
-    setHistory(stored);
-  }, []);
+    const storedHistory = JSON.parse(localStorage.getItem("summaryHistory")) || [];
+    setHistory(storedHistory);
 
-  const handleSummarize = async () => {
-    if (!inputText.trim()) return;
-
-    setSummary("");
-    setLoading(true);
-
-    try {
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            {
-              role: "user",
-              content: `Summarize the following text without any addition. Answer in the user's language:\n${inputText}`,
-            },
-          ],
-        }),
-      });
-
-      if (!response.ok) {
-    const errorText = await response.text();
-    console.error("API Error:", errorText);
-    setSummary("Terjadi kesalahan API: " + errorText);
-    return;
-  }
-
-      const data = await response.json();
-      console.log(data);
-      const hasil = data.choices[0].message.content;
-      if (!hasil) {
-    setSummary("Tidak ada hasil ringkasan dari API.");
-    return;
-  }
-
-      setSummary(hasil);
-      const newHistory = [...history, hasil];
-      setHistory(newHistory);
-      localStorage.setItem("summaryHistory", JSON.stringify(newHistory));
-    } catch (err) {
-      console.error("Gagal:", err);
-    } finally {
-      setLoading(false);
+    // Mengecek tema yang tersimpan di localStorage
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else {
+      // Jika tidak ada tema yang tersimpan, gunakan tema default
+      setTheme("light");
     }
-  };
+  }, []);  // Hanya jalankan saat pertama kali aplikasi dimuat
 
-  const handleReset = () => {
-    setInputText("");
-    setSummary("");
+  // Fungsi untuk mengganti tema (dark mode / light mode)
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);  // Simpan pilihan tema di localStorage
   };
 
   const handleDelete = (index) => {
@@ -76,22 +38,34 @@ const App = () => {
     localStorage.setItem("summaryHistory", JSON.stringify(newHistory));
   };
 
+  const handleReset = () => {
+    setInputText("");
+    setSummary("");
+  };
+
   return (
-    <div className="bg-gray-100 font-sans min-h-screen">
+    <div className={`min-h-screen ${theme === "dark" ? "bg-blue-900 text-white" : "bg-gradient-to-b from-blue-400 to-blue-600 text-white"} font-sans`}>
       <Header title="AI Summarizer" />
-      <main className="max-w-3xl mx-auto p-4">
+      <div className="max-w-3xl mx-auto p-4">
+        <button 
+          onClick={toggleTheme} 
+          className="absolute top-4 right-4 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition"
+        >
+          {theme === "dark" ? "Light Mode" : "Dark Mode"}
+        </button>
         <Summarizer
           inputText={inputText}
           setInputText={setInputText}
           summary={summary}
-          handleSummarize={handleSummarize}
+          setSummary={setSummary}
           handleReset={handleReset}
-          model={model}
-          setModel={setModel}
-          loading={loading}
+          loading={loading}  // Kirimkan loading ke Summarizer
+          setLoading={setLoading}  // Kirimkan setLoading ke Summarizer
+          history={history}
+          setHistory={setHistory}  // Kirimkan setHistory ke Summarizer
         />
         <History history={history} handleDelete={handleDelete} />
-      </main>
+      </div>
     </div>
   );
 };

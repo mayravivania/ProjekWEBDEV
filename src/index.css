@@ -1,1 +1,30 @@
- @import "tailwindcss";
+@import "tailwindcss";
+
+/* Style umum untuk layar besar (desktop) */
+body {
+  font-family: Arial, sans-serif;
+}
+
+/* Untuk tampilan mobile */
+@media only screen and (max-width: 768px) {
+  .summarizer-container {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .textarea {
+    width: 100%;
+    padding: 12px;
+  }
+
+  button {
+    font-size: 14px;
+    padding: 12px;
+    margin: 5px;
+  }
+
+  .header {
+    font-size: 18px;
+    text-align: center;
+  }
+}
